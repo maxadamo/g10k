@@ -371,7 +371,11 @@ func main() {
 
 		createZdevice(zDevice)
 		ensureG10kMounted(zDevice, zfsG10kmountpoint)
-		chownRecursive(zfsG10kmountpoint, zfsUID, zfsGID)
+		chann := chownR(zfsG10kmountpoint)
+		for msg := range chann {
+			os.Chown(msg, zfsUID, zfsGID)
+		}
+		//chownRecursive(zfsG10kmountpoint, zfsUID, zfsGID)
 		createSnapshot(nextSnapshot, zDevice)
 		umountSnapshot(zfsMountpoint)
 		mountSnapshot(zfsMountpoint, zDevice, nextSnapshot)

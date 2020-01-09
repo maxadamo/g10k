@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -131,4 +132,17 @@ func chownRecursive(path string, userName, groupName int) {
 	uidgid := fmt.Sprintf("%v:%v", userName, groupName)
 	cmd := exec.Command("chown", "-R", uidgid, path)
 	cmd.Run()
+}
+
+func chownR(location string) chan string {
+	Verbosef("fixing files ownership under " + location)
+	chann := make(chan string)
+	go func() {
+		filepath.Walk(location, func(path string, _ os.FileInfo, _ error) (err error) {
+			chann <- path
+			return
+		})
+		defer close(chann)
+	}()
+	return chann
 }
